@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy 30th 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Playfair+Display:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060606;
+    --text: rgba(255,255,255,0.85);
+    --muted: rgba(255,255,255,0.35);
+    --subtle: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.09);
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* ── BG GLOW ── */
+  #bg-glow {
+    position: fixed; inset: 0; z-index: 0;
+    transition: background 1.2s ease, opacity 1.2s ease;
+    pointer-events: none;
+  }
+
+  /* ── WRAPPER ── */
+  #app {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 500px;
+    padding: 2rem 1.5rem;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    width: 100%;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    display: none;
+  }
+  .screen.active {
+    display: block;
+  }
+  .screen.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* ── INTRO ── */
+  .intro-wrap { text-align: center; padding: 1rem 0; }
+  .intro-tag {
+    font-size: 0.65rem; letter-spacing: 0.3em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 2.5rem;
+  }
+  .intro-emoji {
+    font-size: 4rem; margin-bottom: 1.5rem; display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+  .intro-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 8vw, 3rem);
+    font-weight: 700; font-style: italic;
+    color: white; line-height: 1.15; margin-bottom: 1.5rem;
+  }
+  .divider {
+    width: 40px; height: 1px;
+    background: rgba(255,255,255,0.15);
+    margin: 0 auto 1.5rem;
+  }
+  .intro-lead {
+    color: var(--muted); font-size: 1.05rem;
+    line-height: 1.7; font-style: italic; margin-bottom: 0.7rem;
+  }
+  .intro-sub {
+    color: rgba(255,255,255,0.25); font-size: 0.92rem;
+    line-height: 1.7; margin-bottom: 3rem;
+  }
+  .btn-start {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.75);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem; letter-spacing: 0.18em;
+    padding: 0.9rem 2.5rem; cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  .btn-start:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.55);
+    color: white;
+  }
+  .intro-hint {
+    margin-top: 2rem;
+    color: rgba(255,255,255,0.12);
+    font-size: 0.78rem; letter-spacing: 0.1em;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { margin-bottom: 2rem; }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .progress-label, .progress-time {
+    font-size: 0.63rem; letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.18); text-transform: uppercase;
+  }
+  .progress-track {
+    height: 1px; background: rgba(255,255,255,0.07);
+    border-radius: 1px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: rgba(255,255,255,0.28);
+    border-radius: 1px; transition: width 0.6s ease;
+  }
+
+  /* ── SCENE CARD ── */
+  .scene-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem 1.6rem;
+    margin-bottom: 1.1rem;
+  }
+  .scene-setting {
+    font-size: 0.63rem; letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.22); text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .scene-narrative {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    font-style: italic; color: rgba(255,255,255,0.88);
+    line-height: 1.55; margin-bottom: 1rem;
+  }
+  .scene-hr {
+    height: 1px; background: rgba(255,255,255,0.06);
+    margin: 1.1rem 0;
+  }
+  .scene-question {
+    font-size: 0.88rem; color: rgba(255,255,255,0.38);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── CHOICES ── */
+  .choices { display: flex; flex-direction: column; gap: 0.65rem; }
+  .choice {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 12px;
+    padding: 1.1rem 1.3rem;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.97rem; line-height: 1.5;
+    cursor: pointer; text-align: left; width: 100%;
+    display: flex; align-items: flex-start; gap: 0.8rem;
+    transition: all 0.25s ease;
+  }
+  .choice:hover:not(:disabled) {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.22);
+    color: white; transform: translateX(4px);
+  }
+  .choice.selected {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.35);
+    color: white;
+  }
+  .choice:disabled { cursor: default; }
+  .choice-icon { font-size: 1.25rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── RESULT ── */
+  .result-wrap { text-align: center; padding: 1rem 0; }
+  .result-tag {
+    font-size: 0.63rem; letter-spacing: 0.3em;
+    text-transform: uppercase; margin-bottom: 1.5rem;
+    opacity: 0.55;
+  }
+  .result-emoji {
+    font-size: 5rem; display: block;
+    margin-bottom: 0.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  .result-city {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 10vw, 4.5rem);
+    font-weight: 800; color: white; letter-spacing: 0.04em;
+    margin-bottom: 0.35rem; line-height: 1;
+  }
+  .result-sub {
+    font-size: 0.82rem; letter-spacing: 0.1em;
+    margin-bottom: 1.5rem; opacity: 0.6;
+  }
+  .result-hr {
+    height: 1px; max-width: 180px; margin: 0 auto 1.5rem;
+  }
+  .result-tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.05rem, 4vw, 1.35rem);
+    font-style: italic; color: rgba(255,255,255,0.88);
+    line-height: 1.5; margin-bottom: 1rem;
+  }
+  .result-desc {
+    font-size: 0.92rem; color: rgba(255,255,255,0.45);
+    line-height: 1.75; margin-bottom: 2rem;
+    max-width: 340px; margin-left: auto; margin-right: auto;
+  }
+  .result-card {
+    border-radius: 12px;
+    padding: 1.3rem 1.5rem; margin-bottom: 2rem;
+  }
+  .result-message {
+    font-size: 1rem; color: rgba(255,255,255,0.7);
+    line-height: 1.75; font-style: italic;
+  }
+  .result-signature {
+    font-size: 0.82rem; margin-top: 0.8rem;
+    letter-spacing: 0.1em; opacity: 0.45;
+  }
+  .result-footer {
+    font-size: 0.63rem; letter-spacing: 0.22em;
+    color: rgba(255,255,255,0.12); text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg-glow"></div>
+
+<div id="app">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-wrap">
+      <div class="intro-tag">Eine Überraschung für dich</div>
+      <span class="intro-emoji">✈️</span>
+      <h1 class="intro-title">Happy 30th,<br>mein Schatz.</h1>
+      <div class="divider"></div>
+      <p class="intro-lead">Ich habe ein Geschenk für dich.</p>
+      <p class="intro-sub">
+        Aber du entscheidest wohin wir reisen.<br>
+        Folge der Geschichte — und vertrau deinem Bauchgefühl.
+      </p>
+      <button class="btn-start" onclick="startQuiz()">DIE REISE BEGINNT →</button>
+      <p class="intro-hint">5 Szenen · 5 Entscheidungen</p>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span class="progress-label" id="prog-label">Szene 1 von 5</span>
+        <span class="progress-time" id="prog-time"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:20%"></div>
+      </div>
+    </div>
+    <div class="scene-card">
+      <div class="scene-setting" id="scene-setting"></div>
+      <p class="scene-narrative" id="scene-narrative"></p>
+      <div class="scene-hr"></div>
+      <p class="scene-question" id="scene-question"></p>
+    </div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-wrap">
+      <div class="result-tag" id="res-tag">Deine Reise führt dich nach</div>
+      <span class="result-emoji" id="res-emoji"></span>
+      <h1 class="result-city" id="res-city"></h1>
+      <div class="result-sub" id="res-sub"></div>
+      <div class="result-hr" id="res-hr"></div>
+      <p class="result-tagline" id="res-tagline"></p>
+      <p class="result-desc" id="res-desc"></p>
+      <div class="result-card" id="res-card">
+        <p class="result-message" id="res-message"></p>
+        <p class="result-signature" id="res-sig"></p>
+      </div>
+      <div class="result-footer" id="res-footer"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// SCENES — Hier kannst du Fragen & Texte anpassen
+// ═══════════════════════════════════════════════
+const scenes = [
+  {
+    time: "06:47 Uhr",
+    setting: "Du öffnest die Augen.",
+    narrative: "Ein fremdes Zimmer. Morgenlicht. Durch das Fenster hörst du die Stadt erwachen...",
+    question: "Was hörst du draußen?",
+    choices: [
+      { text: "Das Dröhnen von Vespas. Espressotassen klirren. Jemand ruft laut in einer romanischen Sprache.", city: "rome", icon: "🛵" },
+      { text: "Fahrradklingeln. Leises Plätschern von Wasser. Möwen in der Ferne.", city: "amsterdam", icon: "🚲" }
+    ]
+  },
+  {
+    time: "11:20 Uhr",
+    setting: "Der Vormittag gehört dir.",
+    narrative: "Keine Pläne. Du schlenderst einfach. Die Stadt zieht dich irgendwohin...",
+    question: "Wo findest du dich wieder?",
+    choices: [
+      { text: "Vor Ruinen, die älter sind als jede Vorstellung. Du stehst still und versuchst zu begreifen.", city: "rome", icon: "🏛️" },
+      { text: "Auf einer Brücke über einem Kanal. Ein Hausboot liegt unten. Irgendwo riecht es nach frisch gebackenem Brot.", city: "amsterdam", icon: "🌉" }
+    ]
+  },
+  {
+    time: "13:45 Uhr",
+    setting: "Hunger.",
+    narrative: "Du setzt dich irgendwo hin. Die Speisekarte liegt vor dir. Kein Stress.",
+    question: "Was bestellst du?",
+    choices: [
+      { text: "Handgemachte Pasta. Ein Glas Chianti. Das Licht fällt schräg durch alte Fensterläden.", city: "rome", icon: "🍝" },
+      { text: "Kroket. Ein Glas lokales Bier. Die Wände sind dunkel und aus altem Holz.", city: "amsterdam", icon: "🍺" }
+    ]
+  },
+  {
+    time: "16:30 Uhr",
+    setting: "Die Stadt lebt.",
+    narrative: "Du bist mittendrin. Kein Tourist mehr — einfach ein Mensch in einer Stadt.",
+    question: "Was nimmst du wahr?",
+    choices: [
+      { text: "Warmer Stein, goldenes Licht, Tauben auf alten Plätzen. Der Geruch von Basilikum und heißem Asphalt.", city: "rome", icon: "☀️" },
+      { text: "Grauer Himmel, bunte Jacken, ein Blumenmarkt mit Tulpen in allen Farben.", city: "amsterdam", icon: "🌷" }
+    ]
+  },
+  {
+    time: "21:15 Uhr",
+    setting: "Letzter Abend.",
+    narrative: "Du sitzt draußen. Ein Glas in der Hand. Morgen fliegst du nach Hause.",
+    question: "Was nimmst du mit?",
+    choices: [
+      { text: "Das Gefühl, dass die Welt viel älter und tiefer ist als man ahnt. Überwältigt. Erleuchtet.", city: "rome", icon: "🌅" },
+      { text: "Das Gefühl, dass das Leben leicht sein kann. Freiheit. Wasser. Licht. Eine Stadt die atmet.", city: "amsterdam", icon: "🌊" }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+// CITIES — Hier kannst du die Ergebnis-Seite anpassen
+// ═══════════════════════════════════════════════
+const cities = {
+  rome: {
+    name: "ROM",
+    sub: "La Città Eterna — Italien 🇮🇹",
+    emoji: "🏛️",
+    tagline: "Die Ewige Stadt wartet auf dich.",
+    desc: "Zwischen Kolosseum und Trastevere, Pasta und Chianti — Rom wird dich für immer verändern. Dein nächstes Kapitel beginnt hier.",
+    message: "Ich freue mich so darauf, diese Stadt mit dir zu entdecken. Du wirst staunen.",
+    signature: "— In Liebe, Sarah ❤️",
+    footer: "SPQR · Roma Aeterna",
+    bgGlow: "radial-gradient(ellipse 70% 50% at 50% 60%, rgba(180,80,40,0.25), transparent)",
+    bg: "linear-gradient(160deg, #0d0500 0%, #2a0c00 60%, #0d0500 100%)",
+    accent: "#D4714A",
+    light: "#F0C9A0",
+    cardBg: "rgba(212,113,74,0.07)",
+    cardBorder: "rgba(212,113,74,0.2)",
+    hrGrad: "linear-gradient(90deg, transparent, #D4714A, transparent)"
+  },
+  amsterdam: {
+    name: "AMSTERDAM",
+    sub: "De Gouden Stad — Niederlande 🇳🇱",
+    emoji: "🌷",
+    tagline: "Die Stadt der Grachten erwartet dich.",
+    desc: "Zwischen Rijksmuseum und Jordaan, Tulpen und Jenever — Amsterdam ist wie kein anderer Ort der Welt. Dein nächstes Kapitel beginnt hier.",
+    message: "Ich freue mich so darauf, diese Stadt mit dir zu entdecken. Du wirst sie lieben.",
+    signature: "— In Liebe, Sarah ❤️",
+    footer: "XXX · Amsterdam 1275",
+    bgGlow: "radial-gradient(ellipse 70% 50% at 50% 60%, rgba(40,120,160,0.25), transparent)",
+    bg: "linear-gradient(160deg, #00080f 0%, #001828 60%, #00080f 100%)",
+    accent: "#4A9DB5",
+    light: "#A8D8E8",
+    cardBg: "rgba(74,157,181,0.07)",
+    cardBorder: "rgba(74,157,181,0.2)",
+    hrGrad: "linear-gradient(90deg, transparent, #4A9DB5, transparent)"
+  }
+};
+
+// ═══════════════════════════════════════════════
+// LOGIC
+// ═══════════════════════════════════════════════
+let current = 0;
+let scores = { rome: 0, amsterdam: 0 };
+let choosing = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'visible');
+  });
+  const el = document.getElementById('screen-' + id);
+  el.classList.add('active');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => el.classList.add('visible'));
+  });
+}
+
+function startQuiz() {
+  current = 0;
+  scores = { rome: 0, amsterdam: 0 };
+  renderScene();
+  showScreen('quiz');
+}
+
+function renderScene() {
+  const s = scenes[current];
+  document.getElementById('prog-label').textContent = `Szene ${current + 1} von ${scenes.length}`;
+  document.getElementById('prog-time').textContent = s.time;
+  document.getElementById('prog-fill').style.width = `${((current + 1) / scenes.length) * 100}%`;
+  document.getElementById('scene-setting').textContent = s.setting;
+  document.getElementById('scene-narrative').textContent = `"${s.narrative}"`;
+  document.getElementById('scene-question').textContent = s.question;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  s.choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = `<span class="choice-icon">${c.icon}</span><span>${c.text}</span>`;
+    btn.onclick = () => handleChoice(c.city, idx);
+    choicesEl.appendChild(btn);
+  });
+  choosing = false;
+}
+
+function handleChoice(city, idx) {
+  if (choosing) return;
+  choosing = true;
+  scores[city]++;
+
+  // Highlight selected
+  document.querySelectorAll('.choice').forEach((b, i) => {
+    b.disabled = true;
+    if (i === idx) b.classList.add('selected');
+  });
+
+  setTimeout(() => {
+    if (current < scenes.length - 1) {
+      // Fade out quiz screen content briefly
+      const quiz = document.getElementById('screen-quiz');
+      quiz.classList.remove('visible');
+      setTimeout(() => {
+        current++;
+        renderScene();
+        quiz.classList.add('visible');
+      }, 350);
+    } else {
+      showResult();
+    }
+  }, 700);
+}
+
+function showResult() {
+  const winner = scores.rome >= scores.amsterdam ? 'rome' : 'amsterdam';
+  const c = cities[winner];
+
+  // Set bg
+  document.getElementById('bg-glow').style.background =
+    c.bg + ', ' + c.bgGlow;
+
+  // Populate result
+  document.getElementById('res-tag').style.color = c.light;
+  document.getElementById('res-emoji').textContent = c.emoji;
+  document.getElementById('res-city').textContent = c.name;
+  document.getElementById('res-city').style.textShadow = `0 0 60px ${c.accent}66`;
+  document.getElementById('res-sub').textContent = c.sub;
+  document.getElementById('res-sub').style.color = c.light;
+  document.getElementById('res-hr').style.background = c.hrGrad;
+  document.getElementById('res-tagline').textContent = `"${c.tagline}"`;
+  document.getElementById('res-desc').textContent = c.desc;
+
+  const card = document.getElementById('res-card');
+  card.style.background = c.cardBg;
+  card.style.border = `1px solid ${c.cardBorder}`;
+
+  document.getElementById('res-message').textContent = c.message;
+  document.getElementById('res-sig').textContent = c.signature;
+  document.getElementById('res-sig').style.color = c.light;
+  document.getElementById('res-footer').textContent = c.footer;
+
+  showScreen('result');
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('intro');
+  setTimeout(() => {
+    document.getElementById('screen-intro').classList.add('visible');
+  }, 100);
+});
+</script>
+</body>
+</html>
