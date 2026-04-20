@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ein neues Abenteuer wartet auf uns! 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100vh;
+    background: #ffffff;
+    color: #111111;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 520px;
+    padding: 2.5rem 1.8rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .screen {
+    width: 100%;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    display: none;
+  }
+  .screen.active { display: block; }
+  .screen.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── INTRO ── */
+  .intro-wrap { text-align: center; }
+  .intro-tag {
+    font-size: 0.85rem;
+    letter-spacing: 0.22em;
+    color: #999;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+  .intro-emoji {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1.2rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  .intro-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    font-weight: 700;
+    color: #111;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .intro-divider {
+    width: 36px; height: 1px;
+    background: #ddd;
+    margin: 0 auto 1.2rem;
+  }
+  .intro-sub {
+    color: #777;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    font-style: italic;
+  }
+  .btn-start {
+    background: #111;
+    border: none;
+    color: #fff;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    padding: 1rem 3rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.25s ease, transform 0.2s ease;
+  }
+  .btn-start:hover { background: #333; transform: translateY(-1px); }
+  .intro-hint {
+    margin-top: 1.5rem;
+    color: #bbb;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { margin-bottom: 2rem; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .progress-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+  .progress-track {
+    height: 1px;
+    background: #e8e8e8;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #111;
+    border-radius: 1px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── SCENE CARD ── */
+  .scene-card {
+    background: #fafafa;
+    border: 1px solid #ebebeb;
+    border-radius: 14px;
+    padding: 1.8rem 1.6rem;
+    margin-bottom: 1.1rem;
+  }
+  .scene-setting {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+  .scene-narrative {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+    font-style: italic;
+    color: #222;
+    line-height: 1.55;
+  }
+  .scene-hr {
+    height: 1px;
+    background: #ebebeb;
+    margin: 1.1rem 0;
+  }
+  .scene-question {
+    font-size: 0.9rem;
+    color: #666;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── TEXT CHOICES ── */
+  .choices { display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.3rem; }
+  .choice {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.1rem 1.3rem;
+    color: #444;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.97rem;
+    line-height: 1.5;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: all 0.22s ease;
+  }
+  .choice:hover:not(:disabled) {
+    border-color: #bbb;
+    background: #f7f7f7;
+    color: #111;
+    transform: translateX(3px);
+  }
+  .choice.selected {
+    background: #111;
+    border-color: #111;
+    color: #fff;
+  }
+  .choice:disabled { cursor: default; }
+  .choice-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── IMAGE CHOICES ── */
+  .image-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1.3rem;
+  }
+  .image-choice {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    background: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .image-choice:hover:not(:disabled) {
+    border-color: #999;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .image-choice.selected {
+    border-color: #111;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .image-choice img {
+    width: 100%;
+    height: 155px;
+    object-fit: cover;
+    display: block;
+  }
+  .image-choice-label {
+    padding: 0.7rem 0.8rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.86rem;
+    color: #555;
+    line-height: 1.4;
+    text-align: left;
+    background: #fafafa;
+  }
+  .image-choice.selected .image-choice-label {
+    background: #111;
+    color: #fff;
+  }
+
+  /* ── NAV ── */
+  .nav-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  .btn-back {
+    background: none;
+    border: 1px solid #ddd;
+    color: #999;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 1.4rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+  }
+  .btn-back:hover:not(:disabled) { border-color: #999; color: #333; }
+  .btn-back:disabled { opacity: 0.2; cursor: default; }
+  .btn-next {
+    background: #111;
+    border: 1px solid #111;
+    color: #fff;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 1.4rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+  }
+  .btn-next:hover:not(:disabled) { background: #333; border-color: #333; }
+  .btn-next:disabled { opacity: 0.25; cursor: default; }
+
+  /* ── RESULT ── */
+  .result-wrap { text-align: center; }
+  .result-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .result-emoji {
+    font-size: 4.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  .result-city {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-weight: 800;
+    color: #111;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+    line-height: 1;
+  }
+  .result-hr {
+    width: 36px;
+    height: 1px;
+    background: #ddd;
+    margin: 1.2rem auto;
+  }
+  .result-tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    font-style: italic;
+    color: #444;
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+  .result-desc {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.7;
+    margin-bottom: 1.8rem;
+  }
+  .result-gift {
+    background: #fafafa;
+    border: 1px solid #ebebeb;
+    border-radius: 14px;
+    padding: 1.5rem 1.5rem;
+    margin-bottom: 1.8rem;
+    text-align: left;
+  }
+  .result-gift-title {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .result-gift-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.97rem;
+    color: #333;
+    line-height: 1.55;
+  }
+  .result-gift-item:last-child { margin-bottom: 0; }
+  .gift-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .result-signature {
+    font-size: 1rem;
+    color: #888;
+    font-style: italic;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-wrap">
+      <div class="intro-tag">For my favorite person on your 30th birthday</div>
+      <span class="<img src="https://drive.google.com/uc?export=view&id=1ZgusIsmcktKN1vvbEtO_KzMkRFy7_EoZ" style="width:200px; height:200px; object-fit:cover; border-radius:50%; margin-bottom:1.2rem; display:block; margin-left:auto; margin-right:auto;">
+      <h1 class="intro-title">Ein neues Abenteuer wartet!</h1>
+      <div class="intro-divider"></div>
+      <p class="intro-sub">Du entscheidest wohin es geht :)</p>
+      <button class="btn-start" onclick="startQuiz()">BEGINNEN</button>
+      <p class="intro-hint">Nur 5 kurze Fragen</p>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span class="progress-label" id="prog-label">Frage 1 von 5</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:20%"></div>
+      </div>
+    </div>
+    <div class="scene-card">
+      <div class="scene-setting" id="scene-setting"></div>
+      <p class="scene-narrative" id="scene-narrative"></p>
+      <div class="scene-hr"></div>
+      <p class="scene-question" id="scene-question"></p>
+    </div>
+    <div id="choices-container"></div>
+    <div class="nav-wrap">
+      <button class="btn-back" id="btn-back" onclick="goBack()">← ZURÜCK</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()" disabled>WEITER →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-wrap">
+      <div class="result-tag">Yuhuuu! Die Entscheidung ist gefallen</div>
+      <span class="result-emoji" id="res-emoji"></span>
+      <h1 class="result-city" id="res-city"></h1>
+      <div class="result-hr"></div>
+      <p class="result-tagline" id="res-tagline"></p>
+      <p class="result-desc" id="res-desc"></p>
+      <div class="result-gift">
+        <div class="result-gift-title">🎁 Was dich erwartet</div>
+        <div class="result-gift-item">
+          <span class="gift-icon">🏨</span>
+          <span id="res-gift-text"></span>
+        </div>
+        <div class="result-gift-item">
+          <span class="gift-icon">✨</span>
+          <span>Den Rest entdecken wir zusammen.</span>
+        </div>
+      </div>
+      <p class="result-signature">Love you, Sarah 🤍</p>
+    </div>
+  </div>
+
+</div>
+<script>
+const scenes = [
+  {
+    setting: "Erster Urlaubstag",
+    narrative: "Kein Wecker gestellt. Keine Termine, keine Pflichten.",
+    question: "Wie sieht der perfekte erste Morgen aus?",
+    type: "text",
+    choices: [
+      { text: "Langsam aufwachen, süßes Frühstück im Freien, danach zu Fuß durch uralte Straßen entlang geschichtsträchtiger Bauten.", city: "rome", icon: "🥐" },
+      { text: "Früh raus, Avocado Brot im hippen Café, danach Fahrrad mieten und die Stadt erkunden. Später mit dem Boot entspannt übers Wasser.", city: "amsterdam", icon: "🚲" }
+    ]
+  },
+  {
+    setting: "Mittagspause",
+    narrative: "Nach all dem Sightseeing haben wir Hunger. Wir setzen uns in ein Café.",
+    question: "Wie sieht unser Lunch aus?",
+    type: "text",
+    choices: [
+      { text: "Pizza, Salat und ein kleines Bier oder einen Aperol.", city: "rome", icon: "🍕" },
+      { text: "Pommes, Bier und eine Waffel zum Teilen.", city: "amsterdam", icon: "🧇" }
+    ]
+  },
+  {
+    setting: "Abend auf dem Balkon",
+    narrative: "Wir sitzen auf dem Balkon unserer Unterkunft. Einen Drink in der Hand.",
+    question: "Was hörst du?",
+    type: "text",
+    choices: [
+      { text: "Motorroller, laute Gespräche, irgendwo Kirchenglocken. Die Stadt schläft nie.", city: "rome", icon: "🛵" },
+      { text: "Fahrräder, Wasser das leise plätschert, ein Boot das vorbeizieht.", city: "amsterdam", icon: "🚤" }
+    ]
+  },
+  {
+    setting: "Bauchgefühl",
+    narrative: "Kein Text. Nur zwei Bilder.",
+    question: "Was zieht dich mehr an?",
+    type: "image",
+    choices: [
+      {
+        city: "rome",
+        img: "https://unsplash.com/de/fotos/eine-statue-vor-einem-grossen-gebaude-9YF7XzTYEro",
+        label: "Enge Gasse, warmes Abendlicht, alte Pflastersteine."
+      },
+      {
+        city: "amsterdam",
+        img: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&q=80",
+        label: "Kanal bei Sonnenuntergang, ein Fahrrad lehnt an einer Brücke."
+      }
+    ]
+  },
+  {
+    setting: "Die Menschen",
+    narrative: "Du fragst jemanden auf der Straße nach dem Weg.",
+    question: "Wie läuft das ab?",
+    type: "text",
+    choices: [
+      { text: "Er erklärt mit den Händen, nennt drei Umwege, empfiehlt dabei noch ein Restaurant und verabschiedet sich wie ein alter Freund.", city: "rome", icon: "🤌" },
+      { text: "Sie lacht, zieht ihr Handy raus, schickt dir den Link und sagt \"enjoy!\" — fertig in 10 Sekunden.", city: "amsterdam", icon: "📱" }
+    ]
+  }
+];
+
+const cities = {
+  rome: {
+    name: "ROM",
+    emoji: "🏛️",
+    tagline: "Pizza, Pasta, Sonne und unendlich viel Geschichte.",
+    desc: "Wir fahren nach Rom. Ich kann es kaum erwarten :)",
+    gift: "Ich habe uns eine Unterkunft in Rom gebucht, die und ein Abendessen deiner Wahl, gehen auf mich!"
+  },
+  amsterdam: {
+    name: "AMSTERDAM",
+    emoji: "🌷",
+    tagline: "Wasser, Bier, Blumen, Kunst & Fahrräder überall.",
+    desc: "Wir fahren nach Amsterdam. Ich kann es kaum erwarten :)",
+    gift: "Ich habe uns eine Unterkunft in Amsterdam gebucht, die und ein Abendessen deiner Wahl, gehen auf mich!"
+  }
+};
+
+let current = 0;
+let answers = new Array(scenes.length).fill(null);
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'visible'));
+  const el = document.getElementById('screen-' + id);
+  el.classList.add('active');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+}
+
+function startQuiz() {
+  current = 0;
+  answers = new Array(scenes.length).fill(null);
+  renderScene();
+  showScreen('quiz');
+}
+
+function renderScene() {
+  const s = scenes[current];
+  document.getElementById('prog-label').textContent = `Frage ${current + 1} von ${scenes.length}`;
+  document.getElementById('prog-fill').style.width = `${((current + 1) / scenes.length) * 100}%`;
+  document.getElementById('scene-setting').textContent = s.setting;
+  document.getElementById('scene-narrative').textContent = s.narrative;
+  document.getElementById('scene-question').textContent = s.question;
+
+  const container = document.getElementById('choices-container');
+  container.innerHTML = '';
+
+  if (s.type === 'image') {
+    const grid = document.createElement('div');
+    grid.className = 'image-choices';
+    s.choices.forEach((c, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'image-choice' + (answers[current] === c.city ? ' selected' : '');
+      btn.innerHTML = `<img src="${c.img}" alt="Option ${idx + 1}" loading="lazy"><div class="image-choice-label">${c.label}</div>`;
+      btn.onclick = () => selectChoice(c.city, idx);
+      grid.appendChild(btn);
+    });
+    container.appendChild(grid);
+  } else {
+    const wrap = document.createElement('div');
+    wrap.className = 'choices';
+    s.choices.forEach((c, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice' + (answers[current] === c.city ? ' selected' : '');
+      btn.innerHTML = `<span class="choice-icon">${c.icon}</span><span>${c.text}</span>`;
+      btn.onclick = () => selectChoice(c.city, idx);
+      wrap.appendChild(btn);
+    });
+    container.appendChild(wrap);
+  }
+
+  document.getElementById('btn-back').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = answers[current] === null;
+  nextBtn.textContent = current === scenes.length - 1 ? 'ERGEBNIS →' : 'WEITER →';
+}
+
+function selectChoice(city, idx) {
+  answers[current] = city;
+  const s = scenes[current];
+  if (s.type === 'image') {
+    document.querySelectorAll('.image-choice').forEach((b, i) => b.classList.toggle('selected', i === idx));
+  } else {
+    document.querySelectorAll('.choice').forEach((b, i) => b.classList.toggle('selected', i === idx));
+  }
+  document.getElementById('btn-next').disabled = false;
+}
+
+function goNext() {
+  if (answers[current] === null) return;
+  if (current < scenes.length - 1) {
+    fadeTransition(() => { current++; renderScene(); });
+  } else {
+    showResult();
+  }
+}
+
+function goBack() {
+  if (current === 0) return;
+  fadeTransition(() => { current--; renderScene(); });
+}
+
+function fadeTransition(cb) {
+  const quiz = document.getElementById('screen-quiz');
+  quiz.classList.remove('visible');
+  setTimeout(() => { cb(); requestAnimationFrame(() => requestAnimationFrame(() => quiz.classList.add('visible'))); }, 300);
+}
+
+function showResult() {
+  const scores = { rome: 0, amsterdam: 0 };
+  answers.forEach(a => { if (a) scores[a]++; });
+  const winner = scores.rome >= scores.amsterdam ? 'rome' : 'amsterdam';
+  const c = cities[winner];
+  document.getElementById('res-emoji').textContent = c.emoji;
+  document.getElementById('res-city').textContent = c.name;
+  document.getElementById('res-tagline').textContent = c.tagline;
+  document.getElementById('res-desc').textContent = c.desc;
+  document.getElementById('res-gift-text').textContent = c.gift;
+  showScreen('result');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('intro');
+  setTimeout(() => document.getElementById('screen-intro').classList.add('visible'), 100);
+});
+</script>
+</body>
+</html>
